@@ -1,0 +1,7 @@
+- declare initial state
+- for every new char that never been declared write a node that link from qi to a qn. In additional add new distance but keep the same height
+- if the letter is already exist in the line, check the next letter, if it has not been created, make a new one and link from previous char to    the next char.
+
+- let's say if we have words like, car and card. we can make a line that has final at r or d
+- if we have repeat letters then loop the final state by adding another letter into the final node
+
