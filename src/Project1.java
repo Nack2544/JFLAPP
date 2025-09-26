@@ -1,8 +1,7 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintStream;
-import java.nio.file.FileAlreadyExistsException;
-import java.util.*;
+import java.util.Scanner;
 
 public class Project1 {
   private static final int DIST_SCALE_HOR = 200;
@@ -57,44 +56,53 @@ public class Project1 {
     int currentId = 1;
     int currentHeight = 0;
 
-
-
-    List<char[]> words = new ArrayList<>();
-    Node node = new Node(1);
-    node.isFinal = true;
-
-    while(input.hasNextLine()){
-
-      System.out.println(input);
-
-
-      String line = input.nextLine().trim();
-      char[] chars = line.toCharArray();
+    // Read lines from standard input until EOF
+    while (input.hasNextLine()) {
+      String line = input.nextLine();
       int lenLine = line.length();
+
+      // Check if the string is a lambda transition
       boolean isLambda = (lenLine == 0) || (line.charAt(0) == '\r') || (line.charAt(0) == '\n');
-      words.add(chars);
 
-      printJFLAPState(output, line, currentId, DIST_SCALE_HOR+200, currentHeight, false, false);
+      // Make a state for the start of our string
+      printJFLAPState(output, currentId, -DIST_SCALE_HOR, currentHeight, false, isLambda);
 
-      for(char[] word: words) {
+      // Make a lambda transition from the initial state (id 0) to the start of our
+      // string
+      printJFLAPTransition(output, 0, currentId, null);
+      currentId++;
 
-        for(int i = 0; i< word.length; i++){
-
-        }
-
-        currentId++;
-
-
-      }
-
-      if(isLambda){
+      if (isLambda) {
+        currentHeight += DIST_SCALE_VERT;
         continue;
       }
+      // Handle each character in the string
+      for (int i = 0; i < lenLine; i++) {
+        // Check if the current character is the end of the string
+        boolean isFinal = (i + 1 >= lenLine) || (line.charAt(i + 1) == '\r') || (line.charAt(i + 1) == '\n');
 
+        // Make the state for the current character
+        printJFLAPState(output, currentId, i * DIST_SCALE_HOR, currentHeight, false, isFinal);
+        char symbol = line.charAt(i);
+
+        if (!Character.isLowerCase(symbol)) {
+          System.out.println(String.format("Symbol '%c' is invalid. All characters should be from a-z", symbol));
+          System.exit(1); // Exit with code 1
+        }
+
+        // Transition from the previous state to the current state
+        printJFLAPTransition(output, currentId - 1, currentId, symbol);
+
+        currentId++;
+        if (isFinal) {
+          break;
+        }
       }
+      currentHeight += DIST_SCALE_VERT;
+    }
 
     // Print our initial state in the middle of the screen vertically
-    printJFLAPState(output, "cat",0, -2 * DIST_SCALE_HOR, (currentHeight - DIST_SCALE_VERT) / 2, true, false);
+    printJFLAPState(output, 0, -2 * DIST_SCALE_HOR, (currentHeight - DIST_SCALE_VERT) / 2, true, false);
     printJFLAPTail(output);
 
     input.close();
@@ -127,7 +135,7 @@ public class Project1 {
 
   /**
    * This should always be printed last!
-   * 
+   *
    * @param output The output stream to print to. This is where the JFLAP file
    *               will be written.
    * @throws NullPointerException if output is null
@@ -165,29 +173,18 @@ public class Project1 {
    * @throws NullPointerException if output is null
    *
    */
-  public static void printJFLAPState(PrintStream output, String word, int stateId, int x, int y, boolean isInitial,
-      boolean isFinal) {
-
-
-
-    for(int i =0; i< word.length(); i++) {
-      char[] letter = word.toCharArray();
-      if (letter == null) {
-
-
-      }
-        output.printf("<state id=\"%d\" name=\"q%d\">\n", stateId, stateId);
-      output.printf("  <x>%d</x>\n", x);
-      output.printf("  <y>%d</y>\n", y);
-      if (isInitial) {
-        output.println("  <initial/>");
-      }
-      if (isFinal) {
-        output.println("  <final/>");
-      }
-      output.println("</state>");
-
+  public static void printJFLAPState(PrintStream output, int stateId, int x, int y, boolean isInitial,
+                                     boolean isFinal) {
+    output.printf("<state id=\"%d\" name=\"q%d\">\n", stateId, stateId);
+    output.printf("  <x>%d</x>\n", x);
+    output.printf("  <y>%d</y>\n", y);
+    if (isInitial) {
+      output.println("  <initial/>");
     }
+    if (isFinal) {
+      output.println("  <final/>");
+    }
+    output.println("</state>");
   }
 
   // Use null to represent a lambda transition
@@ -215,39 +212,15 @@ public class Project1 {
    *               it.
    * @throws NullPointerException if output is null
    */
-
-  public static void stateNode(Character c, int id){
-
-
-
-  }
-
-
-public static void printJFLAPTransition(PrintStream output, int fromId, int toId, Character symbol ){
-
+  public static void printJFLAPTransition(PrintStream output, int fromId, int toId, Character symbol) {
     output.println("<transition>");
-    output.printf("<from> %d </from>", fromId);
-    output.printf("<to> %d </to>", toId);
-    if(symbol == null) {
-      output.println("</read>");
-    }else {
-      output.printf("<read> %c </read>", symbol);
+    output.printf("  <from>%d</from>\n", fromId);
+    output.printf("  <to>%d</to>\n", toId);
+    if (symbol == null) {
+      output.println("  <read/>");
+    } else {
+      output.printf("  <read>%c</read>\n", symbol);
     }
     output.println("</transition>");
-}
-
-
-static class Node{
-    int id;
-    boolean isInitial;
-    boolean isFinal;
-    Map<Character, Node> nextNode;
-
-    Node(int id){
-      this.id = id;
-      this.isInitial = false;
-      this.isFinal = false;
-      this.nextNode = new HashMap<>();
-    }
-}
+  }
 }
