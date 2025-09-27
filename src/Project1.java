@@ -1,33 +1,12 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class Project1 {
     private static final int DIST_SCALE_HOR = 200;
     private static final int DIST_SCALE_VERT = 60;
 
-    static class State{
-        int id;
-        boolean isInitial;
-        boolean isFinal;
-        State right;
-        State left;
-
-        State(){
-
-        }
-        State(int id){
-            this.id = id;
-            this.isInitial = false;
-            this.isFinal = false;
-            this.right = null;
-            this.left = null;
-        }
-    }
 
     public static void main(String[] args) {
         String inputFileName;
@@ -73,32 +52,38 @@ public class Project1 {
 
         printJFLAPHead(output);
 
-        // I am going to eventually make an initial state with an id of 0
-        // I am not making it yet, so I can put it in the middle
-        int currentId = 1;
+
+        int currentId = 0;
         int currentHeight = 0;
         int lineNum = 1;
+//        int currentStates = 0;
 
-        State state = new State(0);
-        ArrayList<State> arrayState = new ArrayList<>();
-        Set<String> setString = new HashSet<>();
+
+        ArrayList<String> stringArray = new ArrayList<>();
+        Set<Character> setChar = new LinkedHashSet<>();
+
+
+
 
         // Read lines from standard input until EOF
         while (input.hasNextLine()) {
             String line = input.nextLine().toLowerCase();
             int lenLine = line.length();
 
-           setString.add(line);
+           stringArray.add(line);
 
-           for(String word: setString){
 
-           }
 
+            int arraySize = stringArray.size();
+
+
+
+            boolean isLambda = (lenLine == 0) || (line.charAt(0) == '\r') || (line.charAt(0) == '\n');
 
             // Make a lambda transition from the initial state (id 0) to the start of our
+
             // string
-            printJFLAPTransition(output, 0, currentId, null);
-            currentId++;
+//            printJFLAPTransition(output, 0, currentId, null);
 
             // Handle each character in the string
             for (int i = 0; i < lenLine; i++) {
@@ -106,7 +91,8 @@ public class Project1 {
                 boolean isFinal = (i + 1 >= lenLine) || (line.charAt(i + 1) == '\r') || (line.charAt(i + 1) == '\n');
 
                 // Make the state for the current character
-                printJFLAPState(output, currentId, i * DIST_SCALE_HOR, currentHeight, false, isFinal);
+//                printJFLAPState(output, currentId, i * DIST_SCALE_HOR, currentHeight, false, isFinal);
+
                 char symbol = line.charAt(i);
 
                 if(symbol < 'a' || symbol > 'z'){
@@ -128,7 +114,23 @@ public class Project1 {
             lineNum++;
             currentHeight += DIST_SCALE_VERT;
 
+
         }
+
+            currentId = setChar.size();
+
+        for(int i = 0; i < currentId; i++){
+
+//            printJFLAPState(output, i,  i * DIST_SCALE_HOR, currentHeight, false, isFinal);
+        }
+
+
+
+
+
+
+
+
 
         // Print our initial state in the middle of the screen vertically
         printJFLAPState(output, 0, -2 * DIST_SCALE_HOR, (currentHeight - DIST_SCALE_VERT) / 2, true, false);
@@ -215,6 +217,26 @@ public class Project1 {
         }
         output.println("</state>");
     }
+
+
+    public static boolean isInitial(){
+        return true;
+    }
+
+    public static int getId(ArrayList<String> array){
+
+        Set<Character> setChar = new LinkedHashSet<>();
+
+        for(String word: array){
+            for(int i =0; i< word.length();i++){
+                setChar.add(word.charAt(i));
+            }
+
+        }
+        return setChar.size();
+    }
+
+
 
     // Use null to represent a lambda transition
     // You SHOULD NOT have a lambda transition in a DFA

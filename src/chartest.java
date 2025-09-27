@@ -2,24 +2,31 @@ import java.util.*;
 
 public class chartest {
     public static void main(String[] args) {
-        Map<Integer, char[]> stateMap = new HashMap<>();
 
-        List<String> stringList = new ArrayList<>();
+        ArrayList<String> stringArray = new ArrayList<>();
+
+        Set<Character> setChar = new LinkedHashSet<>();
+
+        String[] s1 = {"cat", "car", "care"};
 
 
-        stringList.add("cat");
-        stringList.add("car");
-        stringList.add("care");
+        for(String word: s1){
+            stringArray.add(word);
 
-        for(String word: stringList) {
-            int id = 0;
-            char[] c = word.toCharArray();
-            stateMap.put(id, c);
-            System.out.println(c);
         }
 
+        System.out.println(stringArray);
+
+        for(String word: stringArray){
+
+            for(int i = 0; i< word.length();i++){
+                setChar.add(word.charAt(i));
+
+            }
+        }
+        System.out.println(setChar);
 
 
-        System.out.println(stateMap.get(1));
+//        System.out.println(stateMap.get(1));
     }
 }
